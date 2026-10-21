@@ -32,9 +32,7 @@
   <body>
     <a class="skip-link" href="#city-input">Skip to city search</a>
     <main class="page-width">
-      <div class="page-heading">
-        <h1 id="search-heading">Current weather</h1>
-      </div>
+      <h1 class="page-heading">Current weather</h1>
 
       <div class="weather-layout">
         <section class="search-section" aria-label="City search and saved cities">
@@ -46,7 +44,8 @@
                   id="city-input"
                   name="city"
                   type="search"
-                  placeholder="e.g. Khartoum, Sudan"
+                  dir="auto"
+                  placeholder="Khartoum / الخرطوم"
                   maxlength="120"
                   autocomplete="off"
                   enterkeyhint="search"
@@ -95,9 +94,7 @@
 
         <section class="map-section" aria-labelledby="map-heading">
           <div class="map-heading-row">
-            <div class="map-title">
-              <h2 id="map-heading"><span id="map-location">Khartoum, Sudan</span></h2>
-            </div>
+            <h2 id="map-heading" dir="auto">Khartoum, Sudan</h2>
             <div class="map-actions">
               <a id="new-search" href="#city-input" hidden>New search</a>
               <button id="show-weather" class="button button-secondary" type="button" hidden>
@@ -123,11 +120,9 @@
             tabindex="0"
             aria-label="Interactive weather map. Use arrow keys to pan and plus or minus to zoom."
           ></div>
-          <div class="map-footer">
-            <div id="mobile-zoom" role="group" aria-label="Map zoom">
-              <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
-              <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
-            </div>
+          <div id="mobile-zoom" role="group" aria-label="Map zoom">
+            <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+            <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
           </div>
         </section>
       </div>
@@ -141,11 +136,9 @@
     </main>
 
     <footer class="site-footer page-width">
-      <span
-        >Weather:
-        <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer"
-          >OpenWeatherMap</a
-        ></span
+      Weather:
+      <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer"
+        >OpenWeatherMap</a
       >
     </footer>
     <noscript

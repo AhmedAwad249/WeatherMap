@@ -171,6 +171,20 @@ async function fetchJson(url, serviceName) {
   }
 }
 
+// Ignore vowel marks and tatweel when matching Arabic city searches.
+function normalizeCitySearch(city) {
+  return city
+    .normalize("NFC")
+    .replace(/[\u0640\u064b-\u065f\u0670]/g, "")
+    .replace(/،/g, ",")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSearchLanguage(city) {
+  return /\p{Script=Arabic}/u.test(city) ? "ar" : "en";
+}
+
 // First find the coordinates, then request the current weather.
 async function getCoordinates(city) {
   const cacheKey = city.toLocaleLowerCase();
@@ -182,7 +196,13 @@ async function getCoordinates(city) {
   lastGeocodingRequest = Date.now();
 
   const url = new URL(config.geocodingUrl || "https://nominatim.openstreetmap.org/search");
-  url.search = new URLSearchParams({ q: city, format: "jsonv2", limit: "1", addressdetails: "1" });
+  url.search = new URLSearchParams({
+    q: city,
+    format: "jsonv2",
+    limit: "1",
+    addressdetails: "1",
+    "accept-language": getSearchLanguage(city) === "ar" ? "ar,en" : "en"
+  });
   const results = await fetchJson(url, "City search");
   if (!Array.isArray(results)) {
     throw new Error("City search returned an unexpected result. Please try again.");
@@ -212,13 +232,14 @@ async function getCoordinates(city) {
   return location;
 }
 
-async function getWeather(latitude, longitude) {
+async function getWeather(latitude, longitude, language) {
   const url = new URL("https://api.openweathermap.org/data/2.5/weather");
   url.search = new URLSearchParams({
     lat: latitude,
     lon: longitude,
-    appid: config.openWeatherApiKey,
-    units: "metric"
+    appid: config.openWeatherApiKey.trim(),
+    units: "metric",
+    lang: language
   });
   const weather = await fetchJson(url, "OpenWeatherMap");
   if (
@@ -239,7 +260,7 @@ async function handleSearch(event, savedLocation) {
   clearError();
   closeManualShare();
   updateSearchControls();
-  const city = cityInput.value.trim();
+  const city = normalizeCitySearch(cityInput.value);
   if (!savedLocation && !city) {
     cityInput.setAttribute("aria-invalid", "true");
     showError("Enter a city first, such as Khartoum, Sudan.");
@@ -251,9 +272,7 @@ async function handleSearch(event, savedLocation) {
     return;
   }
   if (!config.openWeatherApiKey?.trim()) {
-    showError(
-      "Weather is not connected yet. Copy js/config.example.js to js/config.js and add your OpenWeatherMap key."
-    );
+    showError("Weather is not connected yet. Add your OpenWeatherMap API key in js/config.js.");
     return;
   }
 
@@ -261,7 +280,11 @@ async function handleSearch(event, savedLocation) {
   setStatus(`Finding weather for ${savedLocation?.name || city}…`);
   try {
     const location = savedLocation || (await getCoordinates(city));
-    const weather = await getWeather(location.latitude, location.longitude);
+    const weather = await getWeather(
+      location.latitude,
+      location.longitude,
+      getSearchLanguage(city)
+    );
     currentResult = { location, weather };
     showWeather(location, weather);
     recentCities = [
@@ -269,7 +292,7 @@ async function handleSearch(event, savedLocation) {
       ...recentCities.filter((city) => locationId(city) !== locationId(location))
     ].slice(0, 3);
     const savedRecent = saveStored("weathermap-recent", recentCities);
-    geocodingCache.set(location.label.toLocaleLowerCase(), location);
+    geocodingCache.set(normalizeCitySearch(location.label).toLocaleLowerCase(), location);
     renderRecentCities();
     setStatus(
       savedRecent
@@ -301,7 +324,10 @@ function formatTemperature(celsius) {
 function createElement(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
-  if (text !== undefined) element.textContent = text;
+  if (text !== undefined) {
+    element.textContent = text;
+    element.dir = "auto";
+  }
   return element;
 }
 
@@ -392,7 +418,7 @@ function showWeather(location, weather) {
     autoPanPaddingBottomRight: [12, 12]
   });
   updateMapControls();
-  document.querySelector("#map-location").textContent = location.label;
+  document.querySelector("#map-heading").textContent = location.label;
   document.querySelector("#show-weather").hidden = false;
   document.querySelector("#new-search").hidden = false;
   renderFavorites();
@@ -460,12 +486,16 @@ function renderFavorites() {
     removeButton.setAttribute("aria-label", `Remove ${location.name} from favorites`);
     removeButton.addEventListener("click", () => {
       clearError();
+      const removedIndex = favorites.findIndex(
+        (favorite) => locationId(favorite) === locationId(location)
+      );
       favorites = favorites.filter((favorite) => locationId(favorite) !== locationId(location));
       const saved = saveStored("weathermap-favorites", favorites);
       renderFavorites();
       refreshPopup();
       if (saved) setStatus(`${location.name} removed from favorites.`);
-      cityInput.focus();
+      const remainingButtons = favoritesList.querySelectorAll(".favorite-remove");
+      (remainingButtons[Math.min(removedIndex, remainingButtons.length - 1)] || cityInput).focus();
     });
     chip.append(cityButton, removeButton);
     favoritesList.append(chip);
