@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Search for a city and see its current weather on a map." />
+    <title>WeatherMap</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin="anonymous"
+      defer
+    ></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#city-input">Skip to city search</a>
+    <main class="page-width">
+      <div class="page-heading">
+        <h1 id="search-heading">Current weather</h1>
+      </div>
+
+      <div class="weather-layout">
+        <section class="search-section" aria-label="City search and saved cities">
+          <form id="search-form" novalidate>
+            <label for="city-input">City or location</label>
+            <div class="search-row">
+              <div class="input-wrapper">
+                <input
+                  id="city-input"
+                  name="city"
+                  type="search"
+                  placeholder="e.g. Khartoum, Sudan"
+                  maxlength="120"
+                  autocomplete="off"
+                  enterkeyhint="search"
+                  aria-describedby="error-message"
+                />
+                <button id="clear-search" type="button" aria-label="Clear city" hidden>×</button>
+              </div>
+              <button id="search-button" class="button button-primary" type="submit">
+                <span id="search-spinner" class="spinner" aria-hidden="true" hidden></span>
+                <span id="search-button-text">Get Weather</span>
+              </button>
+            </div>
+            <div class="feedback-area">
+              <p id="status-message" role="status" aria-live="polite"></p>
+              <p id="error-message" class="error-message" role="alert" hidden></p>
+            </div>
+          </form>
+
+          <details id="saved-cities" open>
+            <summary>Saved cities <span id="saved-summary"></span></summary>
+            <div class="saved-content">
+              <div class="saved-section">
+                <h2>Favorites</h2>
+                <div id="favorites" class="favorites-list" aria-label="Favorite cities"></div>
+                <p id="favorites-empty" class="helper-text">No favorites yet.</p>
+              </div>
+
+              <div class="saved-section">
+                <div class="saved-heading">
+                  <h2 id="recent-heading">Try a city</h2>
+                  <button
+                    id="clear-recent"
+                    class="text-button"
+                    type="button"
+                    aria-label="Clear recent searches"
+                    hidden
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div id="recent-cities" class="recent-list" aria-labelledby="recent-heading"></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="map-section" aria-labelledby="map-heading">
+          <div class="map-heading-row">
+            <div class="map-title">
+              <h2 id="map-heading"><span id="map-location">Khartoum, Sudan</span></h2>
+            </div>
+            <div class="map-actions">
+              <a id="new-search" href="#city-input" hidden>New search</a>
+              <button id="show-weather" class="button button-secondary" type="button" hidden>
+                Show weather
+              </button>
+              <div class="unit-switch" role="group" aria-label="Temperature unit">
+                <button type="button" data-unit="celsius" aria-pressed="true" aria-label="Celsius">
+                  °C
+                </button>
+                <button
+                  type="button"
+                  data-unit="fahrenheit"
+                  aria-pressed="false"
+                  aria-label="Fahrenheit"
+                >
+                  °F
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            id="map"
+            tabindex="0"
+            aria-label="Interactive weather map. Use arrow keys to pan and plus or minus to zoom."
+          ></div>
+          <div class="map-footer">
+            <div id="mobile-zoom" role="group" aria-label="Map zoom">
+              <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+              <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <dialog id="manual-share" class="manual-share" aria-labelledby="share-heading" hidden>
+        <h2 id="share-heading">Share weather</h2>
+        <label for="share-text">Select and copy this message.</label>
+        <textarea id="share-text" rows="5" readonly></textarea>
+        <button id="close-share" class="button button-primary" type="button">Done</button>
+      </dialog>
+    </main>
+
+    <footer class="site-footer page-width">
+      <span
+        >Weather:
+        <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer"
+          >OpenWeatherMap</a
+        ></span
+      >
+    </footer>
+    <noscript
+      ><p class="page-width">
+        Please enable JavaScript to search for weather and use the map.
+      </p></noscript
+    >
+  </body>
+</html>

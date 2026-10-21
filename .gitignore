@@ -1,0 +1,23 @@
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+js/config.js
+
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+output/playwright/
+.playwright-cli/
+
+# Local files
+*.log
+.DS_Store
+Thumbs.db
+
+# Local project notes and assignment material
+/README.md
+/PLAN.md
+/Project_2_WeatherMap_SPA.pptx
+/output/
